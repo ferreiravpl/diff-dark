@@ -1,0 +1,10 @@
+/* Ajustes do Diff-Dark sobre o CSS gerado pelo Colloid (injetado pelo apply.sh). */
+
+/* dock à esquerda: menos ar entre os ícones (era 6px por item) */
+#dashtodockContainer.left .dash-item-container .app-well-app,
+#dashtodockContainer.left .show-apps {
+  padding: 2px 6px;
+}
+#dashtodockContainer.left #dash {
+  padding: 6px 0;
+}

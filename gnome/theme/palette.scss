@@ -1,0 +1,74 @@
+// Diff-Dark Color Palette
+// Cinzas neutros com um fio de verde (matiz ~150, saturação < 6%)
+// e acentos apagados — o verde é o único destaque, em tom sálvia.
+
+// Red
+$red-light: #d98880;
+$red-dark: #b5574f;
+
+// Pink
+$pink-light: #cf98a6;
+$pink-dark: #a8667a;
+
+// Purple
+$purple-light: #b3a0c4;
+$purple-dark: #8a74a0;
+
+// Blue
+$blue-light: #93adc0;
+$blue-dark: #5f8199;
+
+// Teal
+$teal-light: #8bbcae;
+$teal-dark: #4f8a7a;
+
+// Green (accent)
+$green-light: #8fb39d;
+$green-dark: #4f7d63;
+
+// Yellow
+$yellow-light: #d6c08e;
+$yellow-dark: #a88f4f;
+
+// Orange
+$orange-light: #d9a383;
+$orange-dark: #b07650;
+
+// Grey
+$grey-050: #f7f8f7;
+$grey-100: #eff1f0;
+$grey-150: #e8eae9;
+$grey-200: #dcdfdd;
+$grey-250: #cdd0ce;
+$grey-300: #bfc3c1;
+$grey-350: #a8adaa;
+$grey-400: #9aa09d;
+$grey-450: #858b88;
+$grey-500: #6b716e;
+$grey-550: #4e5351;
+$grey-600: #3a3e3c;
+$grey-650: #2a2d2c;
+$grey-700: #202322;
+$grey-750: #1b1d1c;
+$grey-800: #161817;
+$grey-850: #111312;
+$grey-900: #0c0d0d;
+$grey-950: #060707;
+
+// White
+$white: #eceeed;
+
+// Black
+$black: #0a0b0b;
+
+// Button
+$button-close: #d98880;
+$button-max: #8fb39d;
+$button-min: #d6c08e;
+
+// Link
+$links: #8fc0b8;
+
+// Theme
+$default-light: $green-light;
+$default-dark: $green-dark;
