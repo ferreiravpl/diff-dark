@@ -201,7 +201,8 @@ menu-height=620
 search-entry-border-radius=(true, 10)
 INI
 
-# blur: barra do topo fosca e terminal com vidro
+# blur: só a barra do topo. O blur de aplicativos (v47, GNOME 42/X11) pisca retângulos
+# pretos no terminal quando ele redesenha só um pedaço da tela; fica desligado.
 dconf load /org/gnome/shell/extensions/blur-my-shell/ <<'INI'
 [panel]
 blur=true
@@ -212,13 +213,7 @@ override-background=false
 static-blur=true
 
 [applications]
-blur=true
-customize=true
-sigma=24
-brightness=0.7
-opacity=255
-enable-all=false
-whitelist=['Gnome-terminal', 'gnome-terminal-server']
+blur=false
 INI
 
 # ── 4. terminal ───────────────────────────────────────────────────────────

@@ -35,7 +35,7 @@ DIFF_BUTTONS=':minimize,maximize,close' ./apply.sh     # botões de janela à di
 - **Dock:** Ubuntu Dock fixo à esquerda, ícones de 28px, fundo `#161817` a 60%, pontinho sálvia
   no app em foco.
 - **Menu:** ArcMenu no layout "Eleven", no canto esquerdo da barra do topo.
-- **Blur:** a barra do topo fica fosca, e o terminal ganha vidro (Blur my Shell).
+- **Blur:** a barra do topo fica fosca (Blur my Shell). O terminal fica só transparente, sem blur.
 - **Terminal:** perfil `Diff` no gnome-terminal (22% transparente, JetBrains Mono, margem
   interna, barra de título no lugar do menu). O perfil antigo continua lá.
 - **Widget:** card com anéis de CPU, RAM e disco no canto superior direito do monitor principal.
@@ -72,5 +72,8 @@ DIFF_BUTTONS=':minimize,maximize,close' ./apply.sh     # botões de janela à di
 - **Ubuntu Dock em vez de Dash to Panel:** o Ubuntu Dock é carregado pela sessão e liga na hora;
   extensões recém-baixadas só carregam depois de recarregar o Shell. Desligar o dock antes
   disso deixa a máquina sem barra.
+- **Sem blur no terminal.** O blur de aplicativos do Blur my Shell (v47, GNOME 42/X11) pisca
+  retângulos pretos quando o terminal redesenha só uma parte da tela (cursor, prompt). Por isso
+  o `apply.sh` deixa ele desligado e o terminal fica só com a transparência.
 - **`pkill -f` com padrão de caminho** mata o próprio shell se o padrão aparecer na linha de
   comando dele. Os scripts usam padrões que só casam com o processo do Conky.
