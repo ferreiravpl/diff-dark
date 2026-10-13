@@ -26,7 +26,7 @@ has_ext() { gnome-extensions info "$1" >/dev/null 2>&1 \
   || [ -d "$HOME/.local/share/gnome-shell/extensions/$1" ] \
   || [ -d "/usr/share/gnome-shell/extensions/$1" ]; }
 
-# ── 0. backup do estado original (uma vez só; o revert.sh volta a ele) ────
+# ── 0. backup do estado original (uma vez só; o uninstall.sh volta a ele) ─
 if [ ! -f "$BACKUP/dconf-full.ini" ]; then
   say "backup do estado atual em $BACKUP"
   mkdir -p "$BACKUP" "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0"
@@ -146,7 +146,7 @@ PY
 # o Ubuntu Dock é carregado pela sessão: liga na hora, sem reload do Shell
 has_ext ubuntu-dock@ubuntu.com && gnome-extensions enable ubuntu-dock@ubuntu.com 2>/dev/null || true
 
-# dock fixo à esquerda, pequeno, semitransparente (Ubuntu Dock / Dash to Dock)
+# dock fixo à esquerda, pequeno, sem fundo (só os ícones) (Ubuntu Dock / Dash to Dock)
 if has_ext ubuntu-dock@ubuntu.com || has_ext dash-to-dock@micxgx.gmail.com; then
   dconf load /org/gnome/shell/extensions/dash-to-dock/ <<INI
 [/]
@@ -162,7 +162,7 @@ apply-custom-theme=false
 transparency-mode='FIXED'
 background-color='#161817'
 custom-background-color=true
-background-opacity=0.6
+background-opacity=0.0
 running-indicator-style='DOTS'
 custom-theme-customize-running-dots=true
 custom-theme-running-dots-color='$SAGE'
@@ -201,16 +201,11 @@ menu-height=620
 search-entry-border-radius=(true, 10)
 INI
 
-# blur: só a barra do topo. O blur de aplicativos (v47, GNOME 42/X11) pisca retângulos
-# pretos no terminal quando ele redesenha só um pedaço da tela; fica desligado.
+# blur: só no overview. A barra do topo são ilhas sem fundo próprio, e o terminal fica
+# só com a transparência do perfil.
 dconf load /org/gnome/shell/extensions/blur-my-shell/ <<'INI'
 [panel]
-blur=true
-customize=true
-sigma=30
-brightness=0.55
-override-background=false
-static-blur=true
+blur=false
 
 [applications]
 blur=false

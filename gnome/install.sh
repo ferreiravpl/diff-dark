@@ -8,13 +8,16 @@
 #   widget                     Conky (AppImage) com o card de CPU/RAM/disco
 #
 # Tudo vai para o diretório do usuário; não usa sudo. Downloads e builds ficam
-# em ~/.cache/diff-dark. Testado no Ubuntu 22.04 (GNOME 42, X11).
+# em ~/.cache/diff-dark. O que é instalado aqui fica anotado em
+# ~/.local/share/diff-dark/installed, e o uninstall.sh remove só isso.
+# Testado no Ubuntu 22.04 (GNOME 42, X11).
 set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/diff-dark"
 EXT_DIR="$HOME/.local/share/gnome-shell/extensions"
 FONT_DIR="$HOME/.local/share/fonts/diff-dark"
+MANIFEST="$HOME/.local/share/diff-dark/installed"
 
 # versões fixas: o mesmo commit gera sempre o mesmo tema
 COLLOID_GTK_REV="fe11342f37f124f1b29d44cf33e9a06053f4bba2"
@@ -28,6 +31,7 @@ EXTENSIONS=(
   "blur-my-shell@aunetx"
 )
 
+track() { mkdir -p "${MANIFEST%/*}"; printf '%s\n' "$@" >> "$MANIFEST"; sort -u -o "$MANIFEST" "$MANIFEST"; }
 say()  { printf '\033[38;2;143;179;157m▸\033[0m %s\n' "$*"; }
 fail() { printf '\033[38;2;217;136;128m✗\033[0m %s\n' "$*" >&2; exit 1; }
 
@@ -39,7 +43,7 @@ for cmd in git curl unzip sassc gnome-shell gnome-extensions gsettings dconf xwi
 done
 python3 -c 'import gi; gi.require_version("Gdk", "3.0")' 2>/dev/null || missing+=("python3-gi")
 python3 -c 'import PIL' 2>/dev/null || missing+=("python3-pil")
-# grep sem -q: com pipefail, o -q fecha o pipe cedo e o SIGPIPE vira falso negativo
+# grep sem -q: com pipefail, o -q fecha o pipe cedo e o teste falha mesmo com a lib
 ldconfig -p | grep 'libfuse.so.2' >/dev/null || missing+=("libfuse2")
 if [ ${#missing[@]} -gt 0 ]; then
   fail "faltando: ${missing[*]}
@@ -55,7 +59,7 @@ clone_at() { # url dir rev
   git -C "$2" checkout -q --force "$3"
 }
 
-# o build do Colloid escreve em ~/.config/gtk-4.0: salva o estado original antes
+# salva as configurações atuais antes de mexer em qualquer coisa
 "$HERE/apply.sh" --backup-only
 
 # ── 1. tema GTK + Shell + libadwaita ──────────────────────────────────────
@@ -64,12 +68,14 @@ clone_at https://github.com/vinceliuice/Colloid-gtk-theme.git "$CACHE/Colloid-gt
 cp "$HERE/theme/palette.scss" "$CACHE/Colloid-gtk-theme/src/sass/_color-palette-default.scss"
 (cd "$CACHE/Colloid-gtk-theme" && ./install.sh -n Diff -t green -c dark --tweaks rimless -l fixed >/dev/null)
 git -C "$CACHE/Colloid-gtk-theme" checkout -q -- src/sass/_color-palette-default.scss
+track "$HOME"/.themes/Diff-Green-Dark*
 
 # ── 2. ícones ─────────────────────────────────────────────────────────────
 if [ ! -d "$HOME/.local/share/icons/Colloid-Grey-Dark" ]; then
   say "instalando ícones Colloid (cinza)"
   clone_at https://github.com/vinceliuice/Colloid-icon-theme.git "$CACHE/Colloid-icon-theme" "$COLLOID_ICONS_REV"
   (cd "$CACHE/Colloid-icon-theme" && ./install.sh -t grey -s default >/dev/null)
+  track "$HOME"/.local/share/icons/Colloid-Grey*
 fi
 
 # ── 3. fontes ─────────────────────────────────────────────────────────────
@@ -83,6 +89,7 @@ if [ ! -f "$FONT_DIR/Inter-Regular.ttf" ] || [ ! -f "$FONT_DIR/JetBrainsMono-Reg
   cp "$CACHE"/fonts/jbmono/fonts/ttf/JetBrainsMono-{Regular,Medium,Bold,Italic}.ttf "$FONT_DIR/"
   cp "$CACHE"/fonts/inter/extras/ttf/Inter-{Light,Regular,Italic,Medium,SemiBold,Bold}.ttf "$FONT_DIR/"
   fc-cache -f "$FONT_DIR" >/dev/null
+  track "$FONT_DIR"
 fi
 
 # ── 4. extensões do Shell ─────────────────────────────────────────────────
@@ -96,6 +103,7 @@ for uuid in "${EXTENSIONS[@]}"; do
     || fail "$uuid não tem versão para o GNOME $SHELL_MAJOR"
   curl -fsSL -o "$CACHE/$uuid.zip" "https://extensions.gnome.org$url"
   gnome-extensions install --force "$CACHE/$uuid.zip"
+  track "extension:$uuid"
 done
 
 # ── 5. Conky ──────────────────────────────────────────────────────────────
@@ -104,6 +112,7 @@ if [ ! -x "$HOME/.local/bin/conky" ]; then
   mkdir -p "$HOME/.local/bin"
   curl -fsSL -o "$HOME/.local/bin/conky" "$CONKY_URL"
   chmod +x "$HOME/.local/bin/conky"
+  track "$HOME/.local/bin/conky"
 fi
 
 # ── 6. aplicar ────────────────────────────────────────────────────────────

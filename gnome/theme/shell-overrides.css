@@ -1,10 +1,34 @@
 /* Ajustes do Diff-Dark sobre o CSS gerado pelo Colloid (injetado pelo apply.sh). */
 
-/* dock à esquerda: menos ar entre os ícones (era 6px por item) */
+/* dock à esquerda: ícones mais próximos */
 #dashtodockContainer.left .dash-item-container .app-well-app,
 #dashtodockContainer.left .show-apps {
   padding: 2px 6px;
 }
 #dashtodockContainer.left #dash {
   padding: 6px 0;
+}
+/* sem fundo (opacidade 0 no dconf) também some o filete claro que o Colloid põe no topo */
+#dashtodockContainer #dash .dash-background {
+  box-shadow: none;
+  border-color: transparent;
+}
+
+/* barra do topo em ilhas: a faixa some e cada grupo (esquerda, centro, direita) vira uma
+   pílula do tamanho do próprio conteúdo, flutuando sobre o wallpaper */
+#panel {
+  background-color: transparent;
+  height: 40px;
+}
+#panel .panel-corner {
+  -panel-corner-background-color: transparent;
+}
+#panel #panelLeft,
+#panel #panelCenter,
+#panel #panelRight {
+  background-color: rgba(22, 24, 23, 0.86);
+  border: 1px solid rgba(236, 238, 237, 0.07);
+  border-radius: 9999px;
+  margin: 6px 8px 2px;
+  padding: 0 2px;
 }

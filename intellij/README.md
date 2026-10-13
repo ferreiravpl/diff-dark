@@ -1,62 +1,48 @@
 # Diff Dark — IntelliJ
 
-Plugin de tema (interface e editor) para IDEs JetBrains **2025.3 ou mais novos** no Linux.
-Independe da parte GNOME.
+**English** · [Português](README.pt-BR.md)
 
-## Instalar
+A theme plugin (UI and editor) for JetBrains IDEs **2025.3 or newer** on Linux. Independent of
+the GNOME part. Needs only `python3`.
+
+## Install
 
 ```bash
-./install.sh                              # com o IDE aberto: detecta instalação e perfil
-./install.sh /opt/idea-IU-253.29346.138   # ou aponte a instalação (pode estar fechado)
-./install.sh --uninstall                  # remove
+./install.sh                              # with the IDE open: detects its install and profile
+./install.sh /opt/idea-IU-253.29346.138   # or point to the install directory (IDE may be closed)
 ```
 
-Depois, **reinicie o IDE** e escolha em **Settings › Appearance › Theme → Diff Dark**. O esquema
-do editor vem junto.
+Restart the IDE and pick **Settings › Appearance › Theme → Diff Dark**. The editor color
+scheme comes with it.
 
-Precisa só de `python3`.
+## Uninstall
 
-## Como é gerado
+```bash
+./uninstall.sh                            # same arguments as install.sh
+```
 
-O `build.py` lê o **Islands Dark** do próprio IDE (tema da interface e esquema do editor)
-e gera um plugin `.jar` com:
+Restart the IDE and it goes back to its default theme.
 
-- **Interface:** o Islands Dark inteiro passa por uma transformação de cor:
-  - cinzas perdem o tom azulado e ganham matiz verde (saturação ≤ 3%);
-  - azuis, que são a cor de destaque do Islands, viram sálvia com ~1/4 da saturação;
-  - as demais cores (erro, aviso, sucesso...) perdem 30% de saturação.
+## How it is made
 
-  O layout de ilhas fica idêntico.
-- **Editor:** o esquema do Islands Dark com a mesma transformação, e por cima a sintaxe definida
-  à mão numa família só de tons (cinza-verde → sálvia → sálvia-azulado).
+`build.py` reads the IDE's own **Islands Dark** theme and color scheme and builds a plugin `.jar`:
 
-| Elemento | Tom | Itálico |
+- **UI:** Islands Dark with its colors shifted: greys lose their blue cast and take a faint
+  green hue, the blue accent becomes sage at about a quarter of its saturation, and every other
+  color is toned down by 30%. The island layout stays the same.
+- **Editor:** the same shift, plus hand-picked syntax colors from a single family of tones
+  (grey-green → sage → blue-sage).
+
+| Element | Tone | Italic |
 |---|---|---|
-| Chamada de método | menta clara | sim |
-| Chamada estática | sálvia-azulado intenso | sim |
-| Declaração de método | quase branco esverdeado | — |
-| Classe / Interface | quase branco neutro / sálvia-azulado | — |
-| Parâmetro / variável local | verde bem claro / cinza | — |
-| Campo / constante | cinza-sálvia / sálvia-azulado escuro | — |
-| Keyword / string | sálvia médio / verde-folha | — |
-| Anotação / comentário | verde escuro apagado / cinza escuro | — |
+| Method call | light mint | yes |
+| Static call | strong blue-sage | yes |
+| Method declaration | near-white green | — |
+| Class / interface | near-white neutral / blue-sage | — |
+| Parameter / local variable | very light green / grey | — |
+| Field / constant | sage grey / dark blue-sage | — |
+| Keyword / string | mid sage / leaf green | — |
+| Annotation / comment | muted dark green / dark grey | — |
 
-Para ajustar, edite a tabela `ROLES` no `build.py` (matiz, luz e saturação por papel) e rode
-o `install.sh` de novo. Ele troca o `.jar` de forma atômica, então pode rodar com o IDE aberto.
-
-## Notas técnicas
-
-- **Nada da JetBrains é redistribuído.** O tema é derivado na máquina de quem instala, a partir
-  do IDE dela.
-- **O jar com o Islands muda entre versões:** `lib/app.jar` no 2025.3,
-  `lib/intellij.platform.ide.impl.jar` no 2026.x. O `build.py` procura em todos os jars de `lib/`.
-- **Perfil (pasta de plugins):** vem de `product-info.json` (`dataDirectoryName`). Se o arquivo
-  não existir, vem de `build.txt` (`IU-253…` → `IntelliJIdea2025.3`). Um IDE aberto pode usar
-  outro perfil via `-Didea.paths.selector`, e o instalador respeita isso.
-- **Heranças de cor no Java** (conferidas no bytecode do IDE):
-  - `METHOD_CALL`, `INHERITED_METHOD` e `ABSTRACT_METHOD` herdam de `FUNCTION_CALL`;
-  - chamada estática usa `STATIC_METHOD`, mas a *declaração* de um método estático usa
-    `METHOD_DECLARATION`, por isso o itálico fica só nas chamadas;
-  - `CONSTRUCTOR_CALL` também herda de `FUNCTION_CALL`. Por isso ele é fixado com a cor de
-    classe, senão o `Foo` de `new Foo()` ficaria itálico com cor de método;
-  - interfaces têm chave própria (`INTERFACE_NAME`), separada de `CLASS_NAME`.
+To tweak a color, edit the `ROLES` table in `build.py` (hue, lightness and saturation per role)
+and run `install.sh` again. It is safe to run with the IDE open.

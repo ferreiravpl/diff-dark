@@ -1,4 +1,5 @@
--- Diff-Dark — card de sistema (anéis de CPU/RAM/disco) desenhado em Cairo.
+-- Diff-Dark — card de sistema (anéis de CPU/RAM/disco) desenhado em Cairo,
+-- com um card opcional de cota de IA embaixo.
 -- no AppImage o cpath aponta pro diretório de build; os bindings ficam em $APPDIR
 local appdir = os.getenv('APPDIR')
 if appdir then package.cpath = appdir .. '/usr/lib/conky/lib?.so;' .. package.cpath end
@@ -14,6 +15,8 @@ local C = {
   edge    = {0x2a, 0x2d, 0x2c},
   sage    = {0x8f, 0xb3, 0x9d},
   grey    = {0xbf, 0xc3, 0xc1},
+  warn    = {0xd6, 0xc0, 0x8e},
+  crit    = {0xd9, 0x88, 0x80},
 }
 
 local UI_FONT = 'Inter'
@@ -97,34 +100,92 @@ local function with_surface(fn)
   cairo_surface_destroy(cs)
 end
 
--- Salva a posição da janela quando ela é arrastada, pra nascer no mesmo
--- lugar no próximo start. Checa a cada 3s; só escreve quando muda.
--- A primeira checagem espera 3s pra o place.py já ter posicionado a janela:
--- assim a posição de nascimento não é confundida com um arraste.
-local POS_FILE = os.getenv('HOME') .. '/.local/share/diff-dark/stats-pos'
-local last_check, last_pos = os.time(), nil
+-- Cota de IA (opcional): o ai_usage.py roda em segundo plano a cada 2 min e grava
+-- um resumo; aqui só se lê o arquivo. Sem o binário (AI_USAGEBAR vazio) o card não existe.
+local AI_BIN = os.getenv('AI_USAGEBAR') or ''
+local AI_FILE = os.getenv('HOME') .. '/.cache/diff-dark/ai-usage.tsv'
+local ai, ai_fetched, ai_read = nil, -math.huge, -math.huge
 
-local function remember_position()
+local function ai_update()
+  if AI_BIN == '' then return end
   local now = os.time()
-  if now - last_check < 3 then return end
-  last_check = now
-  local p = io.popen('xwininfo -name diff-dark-stats 2>/dev/null')
-  if not p then return end
-  local out = p:read('a'); p:close()
-  local x = out:match('Absolute upper%-left X:%s+(%-?%d+)')
-  local y = out:match('Absolute upper%-left Y:%s+(%-?%d+)')
-  if not (x and y) then return end
-  local pos = x .. ' ' .. y
-  if last_pos == nil then last_pos = pos return end -- posição de nascimento
-  if pos ~= last_pos then
-    local f = io.open(POS_FILE, 'w')
-    if f then f:write(pos, '\n'); f:close() end
-    last_pos = pos
+  if now - ai_fetched >= 120 then
+    ai_fetched = now
+    os.execute('python3 -I "' .. os.getenv('DIFF_KIT') .. '/conky/ai_usage.py" >/dev/null 2>&1 &')
+  end
+  if now - ai_read < 5 then return end
+  ai_read = now
+  local f = io.open(AI_FILE)
+  if not f then ai = nil return end
+  local data = {}
+  for line in f:lines() do
+    local k, a, b, c = line:match('^(%w+)\t([^\t]*)\t?([^\t]*)\t?([^\t]*)')
+    if k == 'provider' then data.provider = a
+    elseif k then data[k] = {pct = tonumber(a) or 0, reset = tonumber(b) or 0, window = tonumber(c) or 0} end
+  end
+  f:close()
+  ai = (data.session or data.week) and data or nil
+end
+
+local function countdown(secs)
+  if secs <= 0 then return 'agora' end
+  local d, h, m = secs // 86400, secs % 86400 // 3600, secs % 3600 // 60
+  if d > 0 then return string.format('%dd %dh', d, h) end
+  if h > 0 then return string.format('%dh %02dm', h, m) end
+  return string.format('%dm', m)
+end
+
+-- barra fina com a cota usada e um risco no quanto da janela de tempo já passou:
+-- barra além do risco = consumindo mais rápido que o relógio
+local function quota_row(cr, x0, x1, y, label, q)
+  local now = os.time()
+  local pct = (q.reset > 0 and now >= q.reset) and 0 or q.pct
+  local color = pct >= 90 and C.crit or pct >= 70 and C.warn or C.sage
+  font(cr, UI_FONT, 10.5); rgba(cr, C.muted)
+  text(cr, label, x0, y + 4)
+  font(cr, UI_FONT, 11, true); rgba(cr, C.ink2)
+  text(cr, string.format('%d%%', pct), x1, y + 4, 'right')
+
+  local bx0, bx1 = x0 + 62, x1 - 42
+  cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND)
+  cairo_set_line_width(cr, 4)
+  rgba(cr, C.track)
+  cairo_new_path(cr); cairo_move_to(cr, bx0, y); cairo_line_to(cr, bx1, y); cairo_stroke(cr)
+  if pct > 0 then
+    rgba(cr, color)
+    cairo_new_path(cr); cairo_move_to(cr, bx0, y)
+    cairo_line_to(cr, bx0 + (bx1 - bx0) * math.min(pct, 100) / 100, y); cairo_stroke(cr)
+  end
+  if q.window > 0 and q.reset > now then
+    local elapsed = 1 - (q.reset - now) / q.window
+    local tx = bx0 + (bx1 - bx0) * math.max(0, math.min(1, elapsed))
+    cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT)
+    cairo_set_line_width(cr, 1.5)
+    rgba(cr, C.muted, 0.9)
+    cairo_new_path(cr); cairo_move_to(cr, tx, y - 6); cairo_line_to(cr, tx, y + 6); cairo_stroke(cr)
   end
 end
 
+local function ai_card(cr, W, y0)
+  card(cr, 20, y0, W - 40, 112)
+  local x0, x1 = 40, W - 40
+  font(cr, UI_FONT, 9.5, true); rgba(cr, C.dim)
+  text(cr, (ai.provider or 'IA'):upper(), x0, y0 + 24)
+  local now, y, resets = os.time(), y0 + 48, {}
+  for _, row in ipairs({{'session', 'Sessão', 'sessão'}, {'week', 'Semana', 'semana'}}) do
+    local q = ai[row[1]]
+    if q then
+      quota_row(cr, x0, x1, y, row[2], q)
+      if q.reset > 0 then resets[#resets + 1] = row[3] .. ' ' .. countdown(q.reset - now) end
+      y = y + 24
+    end
+  end
+  font(cr, UI_FONT, 10); rgba(cr, C.dim)
+  if #resets > 0 then text(cr, 'zera: ' .. table.concat(resets, '  ·  '), W / 2, y0 + 100, 'center') end
+end
+
 function conky_stats()
-  remember_position()
+  ai_update()
   with_surface(function(cr, W)
     card(cr, 20, 1, W - 40, 200)
     local cw = (W - 40) / 3
@@ -135,5 +196,7 @@ function conky_stats()
     font(cr, UI_FONT, 10.5); rgba(cr, C.dim)
     text(cr, 'up ' .. conky_parse('${uptime_short}') .. '  ·  load ' .. conky_parse('${loadavg 1}'),
       W / 2, 179, 'center')
+
+    if ai then ai_card(cr, W, 213) end
   end)
 end

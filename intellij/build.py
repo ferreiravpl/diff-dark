@@ -73,6 +73,9 @@ def build_theme(src_text):
     c["popup-completion-match-text"] = "#8FB39D"
     c["search-match-bg"] = "#A88F4F"
     c["editor-text"] = "#C9CDCB"
+    # moldura (barra de cima, faixas laterais, barra de status) quase preta, abaixo das
+    # ilhas; o Islands tem duas variantes de moldura e o IDE escolhe uma delas
+    c["main-window-bg"] = c["main-window-bg-alt"] = "#101110"
     return theme
 
 

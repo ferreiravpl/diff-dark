@@ -1,50 +1,54 @@
 # Diff Dark
 
-Tema escuro minimalista em tons de cinza neutro com um fio de verde. O sálvia
-`#8fb39d` é o único destaque e aparece pouco: seleção, cursor, foco, chamadas de
-método.
+**English** · [Português](README.pt-BR.md)
 
-![Desktop com Diff Dark: terminal translúcido, Nautilus, dock à esquerda e card de sistema](docs/desktop.png)
+A minimal dark theme in neutral greys with a thread of green. Sage `#8fb39d` is the only
+accent and shows up sparingly: selection, cursor, focus, method calls.
 
-![IntelliJ IDEA com Diff Dark](docs/intellij.png)
+![Diff Dark desktop: translucent terminal, Nautilus, floating top bar and system card](docs/desktop.png)
 
-São duas partes **independentes**. Instale uma, a outra ou as duas:
+![IntelliJ IDEA with Diff Dark](docs/intellij.png)
 
-| Parte | O que muda | Instalação |
-|---|---|---|
-| [`gnome/`](gnome/) | GTK 3/4, GNOME Shell, ícones, fontes, dock, menu, terminal, widget de sistema, wallpaper | `gnome/install.sh` |
-| [`intellij/`](intellij/) | Interface e editor do IntelliJ IDEA (e outros IDEs JetBrains 2025.3+) | `intellij/install.sh` |
+Two **independent** parts. Install one, the other, or both:
+
+| Part | What it themes | Install | Uninstall |
+|---|---|---|---|
+| [`gnome/`](gnome/) | GTK 3/4, GNOME Shell, icons, fonts, dock, menu, terminal, system widget, wallpaper | `gnome/install.sh` | `gnome/uninstall.sh` |
+| [`intellij/`](intellij/) | IntelliJ IDEA UI and editor (and other JetBrains IDEs 2025.3+) | `intellij/install.sh` | `intellij/uninstall.sh` |
 
 ```bash
-git clone <este repositório> ~/diff-dark
+git clone https://github.com/ferreiravpl/diff-dark.git ~/diff-dark
 ~/diff-dark/gnome/install.sh      # desktop
-~/diff-dark/intellij/install.sh   # IDE (com o IntelliJ aberto, ou passe o caminho dele)
+~/diff-dark/intellij/install.sh   # IDE (with IntelliJ open, or pass its install path)
 ```
 
-## Paleta
+Uninstalling puts every setting back the way it was before the install and removes
+everything the installer downloaded.
 
-| Papel | Cor |
+## Palette
+
+| Role | Color |
 |---|---|
-| Fundo (janelas / editor) | `#202322` / `#1a1b1a` |
-| Superfícies | `#161817` · `#1b1d1c` · `#2a2d2c` |
-| Bordas | `#3a3e3c` |
-| Texto | `#eceeed` · secundário `#9aa09d` |
-| Destaque | `#8fb39d` (sálvia) · escuro `#4f7d63` |
-| Erro / aviso | `#d98880` / `#d6c08e` |
+| Background (windows / editor) | `#202322` / `#1a1b1a` |
+| Surfaces | `#161817` · `#1b1d1c` · `#2a2d2c` |
+| Borders | `#3a3e3c` |
+| Text | `#eceeed` · secondary `#9aa09d` |
+| Accent | `#8fb39d` (sage) · dark `#4f7d63` |
+| Error / warning | `#d98880` / `#d6c08e` |
 
-Os cinzas têm matiz ~150° e saturação abaixo de 5%: parecem neutros, mas
-conversam com o verde.
+The greys sit at hue ~150° with under 5% saturation: they read as neutral, but they
+match the green.
 
-## O que fica fora do repositório
+## What stays out of this repository
 
-Nada de terceiros é redistribuído. Tudo é baixado ou gerado na hora da instalação:
+No third-party files are redistributed. Everything is downloaded or generated at install time:
 
-- **Tema GTK/Shell:** compilado a partir do [Colloid](https://github.com/vinceliuice/Colloid-gtk-theme),
-  num commit fixo, com a paleta de `gnome/theme/palette.scss`.
-- **Tema do IntelliJ:** gerado a partir do Islands Dark que já vem no IDE de quem instala.
-- **Ícones, fontes, extensões e Conky:** baixados das fontes oficiais, em versões fixas.
+- **GTK/Shell theme:** built from [Colloid](https://github.com/vinceliuice/Colloid-gtk-theme)
+  at a pinned commit, with the palette in `gnome/theme/palette.scss`.
+- **IntelliJ theme:** generated from the Islands Dark theme bundled with the installer's own IDE.
+- **Icons, fonts, extensions and Conky:** downloaded from their official sources, at pinned versions.
 
-## Licença
+## License
 
-[GPL-3.0](LICENSE). `gnome/theme/palette.scss` é uma versão modificada de um arquivo do
-Colloid, que também é GPL-3.0.
+[GPL-3.0](LICENSE). `gnome/theme/palette.scss` is a modified version of a Colloid file,
+which is also GPL-3.0.
